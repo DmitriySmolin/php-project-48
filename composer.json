@@ -6,7 +6,10 @@
   "autoload": {
     "psr-4": {
       "Hexlet\\Code\\": "src/"
-    }
+    },
+    "files": [
+      "src/Differ.php"
+    ]
   },
   "authors": [
     {
@@ -14,7 +17,15 @@
       "email": "neox56@gmail.com"
     }
   ],
+  "scripts": {
+    "phpcs": "phpcs --runtime-set installed_paths vendor/wimg/php-compatibility --standard=PHPCompatibility ."
+  },
   "require": {
-    "docopt/docopt": "^1.0"
+    "docopt/docopt": "^1.0",
+    "funct/funct": "^1.5",
+    "wp-cli/php-cli-tools": "^0.11.19"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^2.2"
   }
 }
