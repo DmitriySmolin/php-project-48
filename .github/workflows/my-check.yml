@@ -1,0 +1,38 @@
+name: my-check
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Step's name
+    steps:
+    - name: Git clone current repo
+      # Check-out repository under GitHub workspace
+      # https://github.com/actions/checkout
+    - uses: actions/checkout@v3
+    - uses: shivammathur/setup-php@v2
+      with:
+         # Specify the PHP version
+         php-version: '8.0'
+    - name: Install
+      # Install project
+      run: make install
+    - name: Run linter
+      # Run Linter
+      run: make lint
+      # Publish code coverage on Code Climate
+      # https://github.com/paambaati/codeclimate-action
+    - name: Run test & publish code coverage
+      uses: paambaati/codeclimate-action@v5.0.0
+      # Add Code Climate secret key
+      env:
+        CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+      with:
+       coverageCommand: make test-coverage,
+       coverageLocations: ${{github.workplace}}/build/logs/clover.xml:clover,
+       debug: true
