@@ -3,10 +3,11 @@
 namespace Differ;
 
 use Exception;
+
 use function cli\line;
 use function Funct\Collection\pluck;
 
-function printDiff(string $first, string $second, string $format = 'stylish'): void
+function printDiff(string $first, string $second, string $format = 'stylish')
 {
     $firstArray = json_decode(file_get_contents($first), true);
     $secondArray = json_decode(file_get_contents($second), true);
@@ -33,11 +34,9 @@ function printDiff(string $first, string $second, string $format = 'stylish'): v
             'same' => line(" %s %s: %s", $sameSign, $property, convertValueToString($change['actual'])),
             default => throw new Exception('Invalid diff status'),
         };
-
     }
 
     line('}');
-
 }
 
 function convertValueToString($value): string

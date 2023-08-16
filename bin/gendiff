@@ -32,5 +32,5 @@ $format = $args['--format'];
 $first = $args['<firstFile>'];
 $second = $args['<secondFile>'];
 
-echo printDiff($first, $second, $format);
+print_r(printDiff($first, $second, $format));
 // gendiff($path1, $path2)
