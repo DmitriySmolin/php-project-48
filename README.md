@@ -9,4 +9,4 @@
 [![asciicast](https://asciinema.org/a/CzutzCjsjQeZVGzSAGnbM9hw6.svg)](https://asciinema.org/a/CzutzCjsjQeZVGzSAGnbM9hw6)
 
 * ### [genDiff YAML](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl) 
-![asciicast](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl.svg)](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl)
+[![asciicast](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl.svg)](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl)
