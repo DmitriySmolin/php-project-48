@@ -1,16 +1,19 @@
 <?php
 
-namespace Differ;
+namespace Gen\Diff;
 
 use Exception;
 
 use function cli\line;
 use function Funct\Collection\pluck;
 
-function printDiff(string $first, string $second, string $format = 'stylish')
+/**
+ * @throws Exception
+ */
+function printDiff(string $first, string $second, string $format = 'stylish'): void
 {
-    $firstArray = json_decode(file_get_contents($first), true);
-    $secondArray = json_decode(file_get_contents($second), true);
+    $firstArray = parseFile($first);
+    $secondArray = parseFile($second);
 
     $oldSign = '-';
     $newSign = '+';

@@ -2,17 +2,18 @@
 
 namespace Php\Package\Tests;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
-use function Differ\genDiff;
+use function Gen\Diff\genDiff;
+use function Gen\Diff\parseFile;
 
 class GenDiffTest extends TestCase
 {
-    public function testGenDiff()
-    {
-        $firstArray = json_decode(file_get_contents('tests/fixtures/examples/file1.json'), true);
-        $secondArray = json_decode(file_get_contents('tests/fixtures/examples/file2.json'), true);
+    private $expected;
 
-        $expected = [
+    public function setUp(): void
+    {
+        $this->expected = [
             'host' => [
                 'old' => 'hexlet.io',
                 'actual' => 'hexlet.io',
@@ -39,10 +40,31 @@ class GenDiffTest extends TestCase
                 'type' => 'added',
             ],
         ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGenDiffJson()
+    {
+        $firstArray = parseFile('tests/fixtures/json/file1.json');
+        $secondArray = parseFile('tests/fixtures/json/file2.json');
 
         $actual = genDiff($firstArray, $secondArray);
 
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($this->expected, $actual);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGenDiffYaml()
+    {
+        $firstArray = parseFile('tests/fixtures/yaml/file1.yaml');
+        $secondArray = parseFile('tests/fixtures/yaml/file2.yaml');
+        $actual = genDiff($firstArray, $secondArray);
+
+        $this->assertEquals($this->expected, $actual);
     }
 
 }
