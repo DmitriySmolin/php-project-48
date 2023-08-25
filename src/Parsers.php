@@ -18,7 +18,6 @@ function parseFile(string $filePath): array
     }
 
     throw new \Exception("Format $extension is not supported!");
-
 }
 
 function parseJson(string $filePath)
