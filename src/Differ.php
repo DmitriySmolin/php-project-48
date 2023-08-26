@@ -15,16 +15,54 @@ function printDiff(string $first, string $second, string $format = 'stylish'): v
     $firstArray = parseFile($first);
     $secondArray = parseFile($second);
 
-    $oldSign = '-';
-    $newSign = '+';
-    $sameSign = ' ';
     $differences = genDiff($firstArray, $secondArray);
 
     ksort($differences);
 
+//    printDiffInTerminal($differences);
+    echo makeStylishString($differences);
+}
+
+function makeStylishString($diff): string
+{
+    ksort($diff);
+    $fieldsString = '';
+
+    foreach ($diff as $key => $data) {
+        $fieldStatus = '';
+        $status = $data['type'];
+
+        switch ($status) {
+            case 'added':
+                $fieldStatus = " + {$key}: " . convertValueToString($data['actual']);
+                break;
+            case 'deleted':
+                $fieldStatus = " - {$key}: " . convertValueToString($data['old']);
+                break;
+            case 'changed':
+                $fieldStatus = " - {$key}: " . convertValueToString($data['old']) .
+                    "\n + {$key}: " . convertValueToString($data['actual']);
+                break;
+            case 'same':
+                $fieldStatus = "   {$key}: " . convertValueToString($data['actual']);
+                break;
+        }
+
+        $fieldsString .= $fieldStatus . "\n";
+    }
+
+    return "{\n$fieldsString}\n";
+}
+
+function printDiffInTerminal($diff): void
+{
+    $oldSign = '-';
+    $newSign = '+';
+    $sameSign = ' ';
+
     line('{');
 
-    foreach ($differences as $property => $change) {
+    foreach ($diff as $property => $change) {
         $status = $change['type'];
 
         match ($status) {
