@@ -4,9 +4,7 @@ namespace Php\Package\Tests;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
-use function Gen\Diff\genDiff;
-use function Gen\Diff\makeStylishString;
-use function Gen\Diff\parseFile;
+use function Differ\Differ\genDiff;
 
 class FormatterTest extends TestCase
 {
@@ -70,6 +68,19 @@ HEREDOC;
     }
 }
 HEREDOC;
+        $this->expected3 = <<<HEREDOC
+Property 'common.follow' was added with value: false
+Property 'common.setting2' was removed
+Property 'common.setting3' was updated. From true to null
+Property 'common.setting4' was added with value: 'blah blah'
+Property 'common.setting5' was added with value: [complex value]
+Property 'common.setting6.doge.wow' was updated. From '' to 'so much'
+Property 'common.setting6.ops' was added with value: 'vops'
+Property 'group1.baz' was updated. From 'bas' to 'bars'
+Property 'group1.nest' was updated. From [complex value] to 'str'
+Property 'group2' was removed
+Property 'group3' was added with value: [complex value]
+HEREDOC;
     }
 
     /**
@@ -118,6 +129,30 @@ HEREDOC;
 
         $actual = genDiff($firstArray, $secondArray);
         $this->assertEquals($this->expected2, $actual);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testMakePlainRecursiveJson()
+    {
+        $firstArray = 'tests/fixtures/recursive/json/file1.json';
+        $secondArray = 'tests/fixtures/recursive/json/file2.json';
+
+        $actual = genDiff($firstArray, $secondArray, 'plain');
+        $this->assertEquals($this->expected3, $actual);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testMakePlainRecursiveYaml()
+    {
+        $firstArray = 'tests/fixtures/recursive/yaml/file1.yaml';
+        $secondArray = 'tests/fixtures/recursive/yaml/file2.yaml';
+
+        $actual = genDiff($firstArray, $secondArray, 'plain');
+        $this->assertEquals($this->expected3, $actual);
     }
 
 }

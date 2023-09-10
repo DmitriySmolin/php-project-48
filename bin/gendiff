@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use function Gen\Diff\genDiff;
+use function Differ\Differ\genDiff;
 
 $autoloadPath1 = __DIR__ . '/../../../autoload.php';
 $autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
@@ -28,9 +28,9 @@ $args = Docopt::handle($doc, array('version' => 'Naval Fate 2.0'));
 foreach ($args as $k => $v)
     echo $k . ': ' . json_encode($v) . PHP_EOL;
 
-$format = $args['--format'];
+$formatName = $args['--format'];
 $first = $args['<firstFile>'];
 $second = $args['<secondFile>'];
 
-$result = genDiff($first, $second, $format);
-echo $result;
+$diff = genDiff($first, $second, $formatName);
+print_r($diff);

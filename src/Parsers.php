@@ -1,6 +1,6 @@
 <?php
 
-namespace Gen\Diff;
+namespace Differ\Parsers;
 
 use Exception;
 use InvalidArgumentException;
