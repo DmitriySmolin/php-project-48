@@ -2,10 +2,14 @@
 
 namespace Gen\Diff;
 
+use Exception;
 use InvalidArgumentException;
 use Symfony\Component\Yaml\Yaml;
 
-function parseFile(string $filePath): array
+/**
+ * @throws Exception
+ */
+function parseFile($filePath)
 {
     $extension = pathinfo($filePath, PATHINFO_EXTENSION);
 
@@ -17,7 +21,7 @@ function parseFile(string $filePath): array
         return parseYaml($filePath);
     }
 
-    throw new \Exception("Format $extension is not supported!");
+    throw new Exception("Format $extension is not supported!");
 }
 
 function parseJson(string $filePath)
@@ -35,5 +39,5 @@ function parseYaml(string $filePath): array
         throw new InvalidArgumentException("File not found: {$filePath}");
     }
 
-    return (array)Yaml::parse(file_get_contents($filePath), Yaml::PARSE_OBJECT_FOR_MAP);
+    return (array) Yaml::parse(file_get_contents($filePath));
 }
