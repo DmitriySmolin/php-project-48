@@ -10,3 +10,6 @@
 
 * ### [genDiff YAML](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl) 
 [![asciicast](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl.svg)](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl)
+
+* ### [genDiff JSON|YAML with recursive](https://asciinema.org/a/M9UrKkFBP6MFKD1iiWIFttkYM) 
+[![asciicast](https://asciinema.org/a/M9UrKkFBP6MFKD1iiWIFttkYM.svg)](https://asciinema.org/a/M9UrKkFBP6MFKD1iiWIFttkYM)

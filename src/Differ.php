@@ -4,6 +4,7 @@ namespace Gen\Diff;
 
 use Exception;
 use Functional;
+
 use function Functional\pick;
 
 const PLUS = '+ ';
