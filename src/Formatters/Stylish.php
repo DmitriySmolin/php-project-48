@@ -2,23 +2,21 @@
 
 namespace Differ\Formatters\Stylish;
 
-use function Functional\pick;
+use Exception;
 
-const PLUS = '+ ';
-const MINUS = '- ';
-const EMPTY_TAG = '  ';
-const LENGTH_OF_TAGS = 2;
-const INDENT_LENGTH = 4;
+use function Functional\pick;
 
 function renderStylish(array $node): string
 {
+    /**
+     * @throws Exception
+     */
     $iter = function ($node, $depth) use (&$iter) {
 
-        $itemIndent = buildIndent($depth, LENGTH_OF_TAGS);
+        $itemIndent = buildIndent($depth, 2);
         $bracketIndent = buildIndent($depth);
 
         $type = pick($node, 'type');
-        $tag = getTag($node);
 
         switch ($type) {
             case 'root':
@@ -44,46 +42,62 @@ function renderStylish(array $node): string
                     $children
                 );
 
-                $result = ["{$itemIndent}{$tag}{$key}: {", ...$lines, "{$bracketIndent}}"];
+                $result = ["{$itemIndent}  {$key}: {", ...$lines, "{$bracketIndent}}"];
                 return implode("\n", $result);
 
             case 'changed':
                 $key = pick($node, 'key');
 
-                [$tag1, $tag2] = explode('.', $tag);
-
                 $renderedValue1 = stringify(pick($node, 'value1'), $depth + 1);
                 $renderedValue2 = stringify(pick($node, 'value2'), $depth + 1);
 
-                $first = "{$itemIndent}{$tag1}{$key}: {$renderedValue1}";
-                $second = "{$itemIndent}{$tag2}{$key}: {$renderedValue2}";
+                $first = "{$itemIndent}- {$key}: {$renderedValue1}";
+                $second = "{$itemIndent}+ {$key}: {$renderedValue2}";
 
                 return implode("\n", [$first, $second]);
 
             case 'deleted':
+                $key = pick($node, 'key');
+                $value = pick($node, 'value');
+
+                $renderedValue = stringify($value, $depth + 1);
+
+                return "{$itemIndent}- {$key}: {$renderedValue}";
+
             case 'added':
+                $key = pick($node, 'key');
+                $value = pick($node, 'value');
+
+                $renderedValue = stringify($value, $depth + 1);
+
+                return "{$itemIndent}+ {$key}: {$renderedValue}";
+
             case 'unchanged':
                 $key = pick($node, 'key');
                 $value = pick($node, 'value');
 
                 $renderedValue = stringify($value, $depth + 1);
 
-                return "{$itemIndent}{$tag}{$key}: {$renderedValue}";
+                return "{$itemIndent}  {$key}: {$renderedValue}";
 
             default:
-                throw new \Exception("Unknown or not existed state");
+                throw new Exception("Unknown or not existed state");
         }
     };
 
     return $iter($node, 0);
 }
 
-function stringify(mixed $data, int $startDepth = 0): string
+function stringify(mixed $data, int $startDepth = 0, callable $toStringFn = null): string
 {
+    $toStringFn = $toStringFn ?: function (mixed $input): string {
+        $exported = var_export($input, true) === 'NULL' ? 'null' : var_export($input, true);
+        return trim($exported, "'");
+    };
 
-    $iter = function ($data, $depth) use (&$iter) {
+    $iter = function ($data, $depth) use (&$iter, $toStringFn) {
         if (!is_array($data)) {
-            return toString($data);
+            return $toStringFn($data);
         }
 
         $itemIndent = buildIndent($depth);
@@ -102,28 +116,8 @@ function stringify(mixed $data, int $startDepth = 0): string
     return $iter($data, $startDepth);
 }
 
-function getTag(array $node): string
-{
-    $tags = [
-        'added' => PLUS,
-        'deleted' => MINUS,
-        'unchanged' => EMPTY_TAG,
-        'nested' => EMPTY_TAG,
-        'changed' => MINUS . '.' . PLUS,
-        'root' => 'no tag',
-    ];
-
-    return ($tags[pick($node, 'type')]);
-}
-
 function buildIndent(int $depthOfNode, int $lengthOfTag = 0): string
 {
     $depthOfElement = $depthOfNode + 1;
-    return str_repeat(' ', INDENT_LENGTH * $depthOfElement - $lengthOfTag);
-}
-
-function toString(mixed $input): string
-{
-    $exported = var_export($input, true) === 'NULL' ? 'null' : var_export($input, true);
-    return trim($exported, "'");
+    return str_repeat(' ', 4 * $depthOfElement - $lengthOfTag);
 }
