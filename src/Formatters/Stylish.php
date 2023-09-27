@@ -104,7 +104,7 @@ function stringify(mixed $data, int $startDepth = 0): string
         $bracketIndent = buildIndent($depth - 1);
 
         $lines = array_map(
-            function($key, $value) use ($iter, $depth, $itemIndent) {
+            function ($key, $value) use ($iter, $depth, $itemIndent) {
                 return "{$itemIndent}{$key}: {$iter($value, $depth + 1)}";
             },
             array_keys($data),
