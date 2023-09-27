@@ -26,7 +26,7 @@
   "license": "MIT",
   "require": {
     "docopt/docopt": "^1.0",
-    "funct/funct": "^1.5",
+    "funct/funct": "^1.4",
     "wp-cli/php-cli-tools": "^0.11.19",
     "symfony/yaml": "^6.3",
     "lstrojny/functional-php": "^1.17"
