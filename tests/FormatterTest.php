@@ -110,26 +110,26 @@ HEREDOC;
     /**
      * @throws Exception
      */
-//    public function testMakeStylishYaml()
-//    {
-//        $firstArray = 'tests/fixtures/yaml/file1.yaml';
-//        $secondArray = 'tests/fixtures/yaml/file2.yaml';
-//
-//        $actual = genDiff($firstArray, $secondArray);
-//        $this->assertEquals($this->expected, $actual);
-//    }
+    public function testMakeStylishYaml()
+    {
+        $firstArray = 'tests/fixtures/yaml/file1.yaml';
+        $secondArray = 'tests/fixtures/yaml/file2.yaml';
+
+        $actual = genDiff($firstArray, $secondArray);
+        $this->assertEquals($this->expected, $actual);
+    }
 
     /**
      * @throws Exception
      */
-//    public function testMakeStylishRecursiveYaml()
-//    {
-//        $firstArray = 'tests/fixtures/recursive/yaml/file1.yaml';
-//        $secondArray = 'tests/fixtures/recursive/yaml/file2.yaml';
-//
-//        $actual = genDiff($firstArray, $secondArray);
-//        $this->assertEquals($this->expected2, $actual);
-//    }
+    public function testMakeStylishRecursiveYaml()
+    {
+        $firstArray = 'tests/fixtures/recursive/yaml/file1.yaml';
+        $secondArray = 'tests/fixtures/recursive/yaml/file2.yaml';
+
+        $actual = genDiff($firstArray, $secondArray);
+        $this->assertEquals($this->expected2, $actual);
+    }
 
     /**
      * @throws Exception
