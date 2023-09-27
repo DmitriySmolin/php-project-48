@@ -3,8 +3,8 @@
 namespace Php\Package\Tests;
 
 use Exception;
-
 use PHPUnit\Framework\TestCase;
+
 use function Differ\Differ\genDiff;
 
 class FormatterTest extends TestCase
@@ -155,6 +155,4 @@ HEREDOC;
         $actual = genDiff($firstArray, $secondArray, 'plain');
         $this->assertEquals($this->expected3, $actual);
     }
-
 }
-
