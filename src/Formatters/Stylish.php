@@ -90,10 +90,11 @@ function renderStylish(array $node): string
 
 function stringify(mixed $data, int $startDepth = 0, callable $toStringFn = null): string
 {
-    $toStringFn =  function (mixed $input): string {
-        $exported = var_export($input, true);
-        if ($exported === 'NULL') {
+    $toStringFn = function (mixed $input): string {
+        if ($input === null) {
             $exported = 'null';
+        } else {
+            $exported = var_export($input, true);
         }
         return trim($exported, "'");
     };
