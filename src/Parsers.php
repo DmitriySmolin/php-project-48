@@ -16,7 +16,6 @@ function parseData(array $dataFile)
     }
 
     [$format, $data] = $dataFile;
-    $format = strtolower($format);
 
     return match ($format) {
         'json' => parseJson($data),

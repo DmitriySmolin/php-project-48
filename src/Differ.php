@@ -97,7 +97,7 @@ function readAndDetectFileFormat(string $filePath): array
     $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
     $supportedFormats = ['json', 'yaml', 'yml'];
 
-    if (!in_array($fileExtension, $supportedFormats)) {
+    if (!in_array($fileExtension, $supportedFormats, true)) {
         throw new Exception("Format '$fileExtension' is not supported!");
     }
 
