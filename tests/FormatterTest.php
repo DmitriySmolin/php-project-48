@@ -3,6 +3,7 @@
 namespace Php\Package\Tests;
 
 use Exception;
+
 use PHPUnit\Framework\TestCase;
 use function Differ\Differ\genDiff;
 
@@ -156,3 +157,4 @@ HEREDOC;
     }
 
 }
+
