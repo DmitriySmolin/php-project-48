@@ -88,7 +88,7 @@ function renderStylish(array $node): string
     return $iter($node, 0);
 }
 
-function stringify(mixed $data, int $startDepth = 0, callable $toStringFn = null): string
+function stringify(mixed $data, int $startDepth = 0): string
 {
     $toStringFn = function (mixed $input): string {
         $exported = $input === null ? 'null' : var_export($input, true);
@@ -104,7 +104,9 @@ function stringify(mixed $data, int $startDepth = 0, callable $toStringFn = null
         $bracketIndent = buildIndent($depth - 1);
 
         $lines = array_map(
-            fn($key, $value) => "{$itemIndent}{$key}: {$iter($value, $depth + 1)}",
+            function($key, $value) use ($iter, $depth, $itemIndent) {
+                return "{$itemIndent}{$key}: {$iter($value, $depth + 1)}";
+            },
             array_keys($data),
             array_values($data)
         );
@@ -115,6 +117,7 @@ function stringify(mixed $data, int $startDepth = 0, callable $toStringFn = null
 
     return $iter($data, $startDepth);
 }
+
 
 function buildIndent(int $depthOfNode, int $lengthOfTag = 0): string
 {
