@@ -22,7 +22,7 @@ function collectDiffLines(array $node, array $lines = [], array $ancestry = []):
 {
     $type = pick($node, 'type');
     $key = pick($node, 'key');
-    $path = buildPathToCurrentNode($ancestry, $key);
+    $path = array_filter(array_merge($ancestry, [$key]), fn($item) => $item !== null);
     $pathString = implode('.', $path);
 
     switch ($type) {
@@ -40,8 +40,8 @@ function collectDiffLines(array $node, array $lines = [], array $ancestry = []):
             );
 
         case 'changed':
-            $renderedValue1 = stringifyValue(pick($node, 'value1'));
-            $renderedValue2 = stringifyValue(pick($node, 'value2'));
+            $renderedValue1 = stringify(pick($node, 'value1'));
+            $renderedValue2 = stringify(pick($node, 'value2'));
             return array_merge(
                 $lines,
                 ["Property '{$pathString}' was updated. From {$renderedValue1} to {$renderedValue2}"]
@@ -55,7 +55,7 @@ function collectDiffLines(array $node, array $lines = [], array $ancestry = []):
 
         case 'added':
             $value = pick($node, 'value');
-            $renderedValue = stringifyValue($value);
+            $renderedValue = stringify($value);
             return array_merge(
                 $lines,
                 ["Property '{$pathString}' was added with value: {$renderedValue}"]
@@ -69,20 +69,11 @@ function collectDiffLines(array $node, array $lines = [], array $ancestry = []):
     }
 }
 
-function buildPathToCurrentNode(array $path, ?string $key): array
+function stringify(mixed $value): string
 {
-    return array_filter(
-        array_merge($path, [$key]),
-        fn($item) => $item !== null
-    );
-}
+    if (is_array($value)) {
+        return '[complex value]';
+    }
 
-function stringifyValue(mixed $value): string
-{
-    return is_array($value) ? '[complex value]' : convertToString($value);
-}
-
-function convertToString(mixed $input): string
-{
-    return var_export($input, true) === 'NULL' ? 'null' : var_export($input, true);
+    return var_export($value, true) === 'NULL' ? 'null' : var_export($value, true);
 }

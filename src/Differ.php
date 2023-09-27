@@ -3,40 +3,40 @@
 namespace Differ\Differ;
 
 use Exception;
-use Functional;
 
+use function Functional\sort;
 use function Differ\Formatters\formatRecords;
-use function Differ\Parsers\parseFile;
+use function Differ\Parsers\parseData;
 
 /**
  * @throws Exception
  */
 function genDiff(string $firstPath, string $secondPath, string $formatName = 'stylish'): string
 {
-    $first = (array)parseFile($firstPath);
-    $second = (array)parseFile($secondPath);
-    $diffTree = buildDiffTree($first, $second);
+    $firstArray = parseData(readAndDetectFileFormat($firstPath));
+    $secondArray = parseData(readAndDetectFileFormat($secondPath));
+    $diffTree = buildDiffTree($firstArray, $secondArray);
     return formatRecords($diffTree, $formatName);
 }
 
 
-function buildDiff(array $first, array $second): array
+function buildDiff(array $firstArray, array $secondArray): array
 {
     $keys = array_unique(
         array_merge(
-            array_keys($first),
-            array_keys($second)
+            array_keys($firstArray),
+            array_keys($secondArray)
         )
     );
 
-    $sortedKeys = Functional\sort($keys, fn($left, $right) => strcmp($left, $right));
+    $sortedKeys = sort($keys, fn($left, $right) => strcmp($left, $right));
 
-    return array_map(function ($key) use ($first, $second) {
+    return array_map(function ($key) use ($firstArray, $secondArray) {
 
-        $value1 = $first[$key] ?? null;
-        $value2 = $second[$key] ?? null;
+        $value1 = $firstArray[$key] ?? null;
+        $value2 = $secondArray[$key] ?? null;
 
-        if (!array_key_exists($key, $first)) {
+        if (!array_key_exists($key, $firstArray)) {
             return [
                 'key' => $key,
                 'type' => 'added',
@@ -44,7 +44,7 @@ function buildDiff(array $first, array $second): array
             ];
         }
 
-        if (!array_key_exists($key, $second)) {
+        if (!array_key_exists($key, $secondArray)) {
             return [
                 'key' => $key,
                 'type' => 'deleted',
@@ -77,10 +77,32 @@ function buildDiff(array $first, array $second): array
     }, $sortedKeys);
 }
 
-function buildDiffTree(array $first, array $second): array
+function buildDiffTree(array $firstArray, array $secondArray): array
 {
     return [
         'type' => 'root',
-        'children' => buildDiff($first, $second),
+        'children' => buildDiff($firstArray, $secondArray),
     ];
+}
+
+/**
+ * @throws Exception
+ */
+function readAndDetectFileFormat(string $filePath): array
+{
+    if (!file_exists($filePath)) {
+        throw new Exception("File not found: {$filePath}");
+    }
+
+    $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+    $supportedFormats = ['json', 'yaml', 'yml'];
+
+    if (!in_array($fileExtension, $supportedFormats)) {
+        throw new Exception("Format '$fileExtension' is not supported!");
+    }
+
+    $format = $fileExtension;
+    $data = file_get_contents($filePath);
+
+    return [$format, $data];
 }

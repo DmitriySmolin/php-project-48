@@ -9,35 +9,28 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @throws Exception
  */
-function parseFile($filePath)
+function parseData(array $dataFile)
 {
-    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-
-    if ($extension === 'json') {
-        return parseJson($filePath);
+    if (count($dataFile) < 2) {
+        throw new InvalidArgumentException("Invalid input data: expected at least two elements");
     }
 
-    if (in_array($extension, ['yaml', 'yml'])) {
-        return parseYaml($filePath);
-    }
+    [$format, $data] = $dataFile;
+    $format = strtolower($format);
 
-    throw new Exception("Format $extension is not supported!");
+    return match ($format) {
+        'json' => parseJson($data),
+        'yaml', 'yml' => parseYaml($data),
+        default => throw new Exception("Format $format is not supported!"),
+    };
 }
 
-function parseJson(string $filePath)
+function parseJson(string $jsonData)
 {
-    if (!file_exists($filePath)) {
-        throw new InvalidArgumentException("File not found: {$filePath}");
-    }
-
-    return json_decode(file_get_contents($filePath), true);
+    return json_decode($jsonData, true);
 }
 
-function parseYaml(string $filePath): array
+function parseYaml(string $yamlData): array
 {
-    if (!file_exists($filePath)) {
-        throw new InvalidArgumentException("File not found: {$filePath}");
-    }
-
-    return (array) Yaml::parse(file_get_contents($filePath));
+    return (array)Yaml::parse($yamlData);
 }
