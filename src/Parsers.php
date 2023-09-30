@@ -3,33 +3,24 @@
 namespace Differ\Parsers;
 
 use Exception;
-use InvalidArgumentException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * @throws Exception
  */
-function parseData(array $dataFile)
+function parseData(array $fileData): array
 {
-    if (count($dataFile) < 2) {
-        throw new InvalidArgumentException("Invalid input data: expected at least two elements");
+    [$format, $data] = $fileData;
+
+    $supportedFormats = ['json', 'yaml', 'yml'];
+
+    if (!in_array($format, $supportedFormats, true)) {
+        throw new Exception("Format '$format' is not supported!");
     }
 
-    [$format, $data] = $dataFile;
-
     return match ($format) {
-        'json' => parseJson($data),
-        'yaml', 'yml' => parseYaml($data),
-        default => throw new Exception("Format $format is not supported!"),
+        'json' => json_decode($data, true),
+        'yaml', 'yml' => (array)Yaml::parse($data),
+        default => throw new Exception("Format $format is not supported."),
     };
-}
-
-function parseJson(string $jsonData)
-{
-    return json_decode($jsonData, true);
-}
-
-function parseYaml(string $yamlData): array
-{
-    return (array)Yaml::parse($yamlData);
 }

@@ -6,118 +6,109 @@ use Exception;
 
 use function Functional\pick;
 
+/**
+ * @throws Exception
+ */
 function renderStylish(array $node): string
 {
-    /**
-     * @throws Exception
-     */
-    $iter = function ($node, $depth) use (&$iter) {
-
-        $itemIndent = buildIndent($depth, 2);
-        $bracketIndent = buildIndent($depth);
-
-        $type = pick($node, 'type');
-
-        switch ($type) {
-            case 'root':
-                $children = pick($node, 'children');
-                $lines = array_map(
-                    function ($node) use ($iter, $depth) {
-                        return $iter($node, $depth);
-                    },
-                    $children
-                );
-
-                $result = ['{', ...$lines, '}'];
-                return implode("\n", $result);
-
-            case 'nested':
-                $key = pick($node, 'key');
-                $children = pick($node, 'children');
-
-                $lines = array_map(
-                    function ($node) use ($iter, $depth) {
-                        return $iter($node, $depth + 1);
-                    },
-                    $children
-                );
-
-                $result = ["{$itemIndent}  {$key}: {", ...$lines, "{$bracketIndent}}"];
-                return implode("\n", $result);
-
-            case 'changed':
-                $key = pick($node, 'key');
-
-                $renderedValue1 = stringify(pick($node, 'value1'), $depth + 1);
-                $renderedValue2 = stringify(pick($node, 'value2'), $depth + 1);
-
-                $first = "{$itemIndent}- {$key}: {$renderedValue1}";
-                $second = "{$itemIndent}+ {$key}: {$renderedValue2}";
-
-                return implode("\n", [$first, $second]);
-
-            case 'deleted':
-                $key = pick($node, 'key');
-                $value = pick($node, 'value');
-
-                $renderedValue = stringify($value, $depth + 1);
-
-                return "{$itemIndent}- {$key}: {$renderedValue}";
-
-            case 'added':
-                $key = pick($node, 'key');
-                $value = pick($node, 'value');
-
-                $renderedValue = stringify($value, $depth + 1);
-
-                return "{$itemIndent}+ {$key}: {$renderedValue}";
-
-            case 'unchanged':
-                $key = pick($node, 'key');
-                $value = pick($node, 'value');
-
-                $renderedValue = stringify($value, $depth + 1);
-
-                return "{$itemIndent}  {$key}: {$renderedValue}";
-
-            default:
-                throw new Exception("Unknown or not existed state");
-        }
-    };
-
-    return $iter($node, 0);
+    return nodeIterator($node, 0);
 }
 
-function stringify(mixed $data, int $startDepth = 0): string
+/**
+ * @throws Exception
+ */
+function nodeIterator(array $node, int $depth): string
 {
-    $toStringFn = function (mixed $input): string {
-        $exported = $input === null ? 'null' : var_export($input, true);
-        return trim($exported, "'");
-    };
+    $itemIndent = buildIndent($depth, 2);
+    $bracketIndent = buildIndent($depth);
 
-    $iter = function ($data, $depth) use (&$iter, $toStringFn) {
-        if (!is_array($data)) {
-            return $toStringFn($data);
-        }
+    $type = pick($node, 'type');
 
-        $itemIndent = buildIndent($depth);
-        $bracketIndent = buildIndent($depth - 1);
+    switch ($type) {
+        case 'root':
+            $children = pick($node, 'children');
+            $lines = array_map(
+                function (array $node) use ($depth) {
+                    return nodeIterator($node, $depth);
+                },
+                $children
+            );
 
-        $lines = array_map(
-            function ($key, $value) use ($iter, $depth, $itemIndent) {
-                return "{$itemIndent}{$key}: {$iter($value, $depth + 1)}";
-            },
-            array_keys($data),
-            array_values($data)
-        );
+            $result = ['{', ...$lines, '}'];
+            return implode("\n", $result);
 
-        $result = ['{', ...$lines, "{$bracketIndent}}"];
-        return implode("\n", $result);
-    };
+        case 'nested':
+            $key = pick($node, 'key');
+            $children = pick($node, 'children');
 
-    return $iter($data, $startDepth);
+            $lines = array_map(
+                function (array $node) use ($depth) {
+                    return nodeIterator($node, $depth + 1);
+                },
+                $children
+            );
+
+            $result = ["{$itemIndent}  {$key}: {", ...$lines, "{$bracketIndent}}"];
+            return implode("\n", $result);
+
+        case 'changed':
+            $key = pick($node, 'key');
+
+            $renderedValue1 = stringify(pick($node, 'value1'), $depth + 1);
+            $renderedValue2 = stringify(pick($node, 'value2'), $depth + 1);
+
+            $first = "{$itemIndent}- {$key}: {$renderedValue1}";
+            $second = "{$itemIndent}+ {$key}: {$renderedValue2}";
+
+            return implode("\n", [$first, $second]);
+
+        case 'deleted':
+            $key = pick($node, 'key');
+            $value = pick($node, 'value');
+
+            $renderedValue = stringify($value, $depth + 1);
+
+            return "{$itemIndent}- {$key}: {$renderedValue}";
+
+        case 'added':
+            $key = pick($node, 'key');
+            $value = pick($node, 'value');
+
+            $renderedValue = stringify($value, $depth + 1);
+
+            return "{$itemIndent}+ {$key}: {$renderedValue}";
+
+        case 'unchanged':
+            $key = pick($node, 'key');
+            $value = pick($node, 'value');
+
+            $renderedValue = stringify($value, $depth + 1);
+
+            return "{$itemIndent}  {$key}: {$renderedValue}";
+
+        default:
+            throw new Exception("Unknown or not existed state");
+    }
 }
 
+function stringify(mixed $data, int $depth = 0): string
+{
+    if (!is_array($data)) {
+        $data = $data === null ? 'null' : var_export($data, true);
+        return trim($data, "'");
+    }
+
+    $itemIndent = buildIndent($depth);
+    $bracketIndent = buildIndent($depth - 1);
+
+    $lines = [];
+    foreach ($data as $key => $value) {
+        $key = stringify($key);
+        $value = stringify($value, $depth + 1);
+        $lines[] = "{$itemIndent}{$key}: {$value}";
+    }
+    return implode("\n", ['{', ...$lines, "{$bracketIndent}}"]);
+}
 
 function buildIndent(int $depthOfNode, int $lengthOfTag = 0): string
 {

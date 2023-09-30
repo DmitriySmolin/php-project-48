@@ -13,8 +13,8 @@ use function Differ\Parsers\parseData;
  */
 function genDiff(string $firstPath, string $secondPath, string $formatName = 'stylish'): string
 {
-    $firstArray = parseData(readAndDetectFileFormat($firstPath));
-    $secondArray = parseData(readAndDetectFileFormat($secondPath));
+    $firstArray = parseData(getFileData($firstPath));
+    $secondArray = parseData(getFileData($secondPath));
     $diffTree = buildDiffTree($firstArray, $secondArray);
     return formatRecords($diffTree, $formatName);
 }
@@ -29,9 +29,9 @@ function buildDiff(array $firstArray, array $secondArray): array
         )
     );
 
-    $sortedKeys = sort($keys, fn($left, $right) => strcmp($left, $right));
+    $sortedKeys = sort($keys, fn(string $left, string $right) => strcmp($left, $right));
 
-    return array_map(function ($key) use ($firstArray, $secondArray) {
+    return array_map(function (string $key) use ($firstArray, $secondArray) {
 
         $value1 = $firstArray[$key] ?? null;
         $value2 = $secondArray[$key] ?? null;
@@ -88,20 +88,14 @@ function buildDiffTree(array $firstArray, array $secondArray): array
 /**
  * @throws Exception
  */
-function readAndDetectFileFormat(string $filePath): array
+function getFileData(string $filePath): array
 {
     if (!file_exists($filePath)) {
         throw new Exception("File not found: {$filePath}");
     }
 
-    $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
-    $supportedFormats = ['json', 'yaml', 'yml'];
+    $format = pathinfo($filePath, PATHINFO_EXTENSION);
 
-    if (!in_array($fileExtension, $supportedFormats, true)) {
-        throw new Exception("Format '$fileExtension' is not supported!");
-    }
-
-    $format = $fileExtension;
     $data = file_get_contents($filePath);
 
     return [$format, $data];

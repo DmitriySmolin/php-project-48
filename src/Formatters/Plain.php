@@ -18,56 +18,50 @@ function renderPlain(array $tree): string
 /**
  * @throws Exception
  */
-function collectDiffLines(array $node, array $lines = [], array $ancestry = []): array
+function collectDiffLines(array $node, array $ancestry = []): array
 {
     $type = pick($node, 'type');
     $key = pick($node, 'key');
     $path = array_filter(array_merge($ancestry, [$key]), fn($item) => $item !== null);
     $pathString = implode('.', $path);
 
+    $lines = [];
+
     switch ($type) {
         case 'root':
         case 'nested':
             $children = pick($node, 'children');
-            return array_reduce(
-                $children,
-                fn($lines, $child) => collectDiffLines(
-                    $child,
-                    $lines,
-                    $path,
-                ),
-                $lines
-            );
+            foreach ($children as $child) {
+                $lines = array_merge($lines, collectDiffLines($child, $path));
+            }
+            break;
 
         case 'changed':
             $renderedValue1 = stringify(pick($node, 'value1'));
             $renderedValue2 = stringify(pick($node, 'value2'));
-            return array_merge(
-                $lines,
-                ["Property '{$pathString}' was updated. From {$renderedValue1} to {$renderedValue2}"]
-            );
+            $lines = ["Property '$pathString' was updated. From $renderedValue1 to $renderedValue2"];
+            break;
 
         case 'deleted':
-            return array_merge(
-                $lines,
-                ["Property '{$pathString}' was removed"]
-            );
+            $lines = ["Property '$pathString' was removed"];
+            break;
 
         case 'added':
             $value = pick($node, 'value');
             $renderedValue = stringify($value);
-            return array_merge(
-                $lines,
-                ["Property '{$pathString}' was added with value: {$renderedValue}"]
-            );
+            $lines = ["Property '$pathString' was added with value: $renderedValue"];
+            break;
 
         case 'unchanged':
-            return $lines;
+            break;
 
         default:
             throw new \Exception("Unknown or nonexistent state");
     }
+
+    return $lines;
 }
+
 
 function stringify(mixed $value): string
 {
