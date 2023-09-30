@@ -21,6 +21,5 @@ function parseData(array $fileData): array
     return match ($format) {
         'json' => json_decode($data, true),
         'yaml', 'yml' => (array)Yaml::parse($data),
-        default => throw new Exception("Format $format is not supported."),
     };
 }

@@ -25,41 +25,35 @@ function collectDiffLines(array $node, array $ancestry = []): array
     $path = array_filter(array_merge($ancestry, [$key]), fn($item) => $item !== null);
     $pathString = implode('.', $path);
 
-    $lines = [];
-
     switch ($type) {
         case 'root':
         case 'nested':
             $children = pick($node, 'children');
+            $nestedLines = [];
             foreach ($children as $child) {
-                $lines = array_merge($lines, collectDiffLines($child, $path));
+                $nestedLines = array_merge($nestedLines, collectDiffLines($child, $path));
             }
-            break;
+            return $nestedLines;
 
         case 'changed':
             $renderedValue1 = stringify(pick($node, 'value1'));
             $renderedValue2 = stringify(pick($node, 'value2'));
-            $lines = ["Property '$pathString' was updated. From $renderedValue1 to $renderedValue2"];
-            break;
+            return ["Property '$pathString' was updated. From $renderedValue1 to $renderedValue2"];
 
         case 'deleted':
-            $lines = ["Property '$pathString' was removed"];
-            break;
+            return ["Property '$pathString' was removed"];
 
         case 'added':
             $value = pick($node, 'value');
             $renderedValue = stringify($value);
-            $lines = ["Property '$pathString' was added with value: $renderedValue"];
-            break;
+            return ["Property '$pathString' was added with value: $renderedValue"];
 
         case 'unchanged':
-            break;
+            return [];
 
         default:
             throw new \Exception("Unknown or nonexistent state");
     }
-
-    return $lines;
 }
 
 

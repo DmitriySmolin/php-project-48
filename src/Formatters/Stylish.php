@@ -94,19 +94,16 @@ function nodeIterator(array $node, int $depth): string
 function stringify(mixed $data, int $depth = 0): string
 {
     if (!is_array($data)) {
-        $data = $data === null ? 'null' : var_export($data, true);
-        return trim($data, "'");
+        return trim($data === null ? 'null' : var_export($data, true), "'");
     }
 
     $itemIndent = buildIndent($depth);
     $bracketIndent = buildIndent($depth - 1);
 
-    $lines = [];
-    foreach ($data as $key => $value) {
-        $key = stringify($key);
-        $value = stringify($value, $depth + 1);
-        $lines[] = "{$itemIndent}{$key}: {$value}";
-    }
+    $lines = array_map(function ($key, $value) use ($depth, $itemIndent) {
+        return "{$itemIndent}" . stringify($key) . ": " . stringify($value, $depth + 1);
+    }, array_keys($data), $data);
+
     return implode("\n", ['{', ...$lines, "{$bracketIndent}}"]);
 }
 
