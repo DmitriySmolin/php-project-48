@@ -29,11 +29,9 @@ function collectDiffLines(array $node, array $ancestry = []): array
         case 'root':
         case 'nested':
             $children = pick($node, 'children');
-            $nestedLines = [];
-            foreach ($children as $child) {
-                $nestedLines = array_merge($nestedLines, collectDiffLines($child, $path));
-            }
-            return $nestedLines;
+            return array_reduce(array_map(function ($child) use ($path) {
+                return collectDiffLines($child, $path);
+            }, $children), 'array_merge', []);
 
         case 'changed':
             $renderedValue1 = stringify(pick($node, 'value1'));
