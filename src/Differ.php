@@ -26,13 +26,11 @@ function buildDiff(object $firstObj, object $secondObj): array
         array_keys(get_object_vars($firstObj))
     );
 
-    $sortedUniqueKeys = array_values(array_unique($mergedKeys));
-    sort($sortedUniqueKeys);
+    $sortedUniqueKeys = array_unique($mergedKeys);
+    sort($sortedUniqueKeys, SORT_NATURAL);
 
     return array_map(function (mixed $key) use ($firstObj, $secondObj) {
-        if (!is_object($firstObj) || !is_object($secondObj)) {
-            throw new InvalidArgumentException('Expected an object for $firstObj and $secondObj');
-        }
+
         if (!property_exists($secondObj, $key)) {
             return [
                 'name' => $key,
