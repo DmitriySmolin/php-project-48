@@ -18,47 +18,48 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
     return formatRecords($diffTree, $formatName);
 }
 
-
 function buildDiff($firstObj, $secondObj): array
 {
     $mergedKeys = array_merge(array_keys(get_object_vars($secondObj)), array_keys(get_object_vars($firstObj)));
     $uniqueKeys = array_unique($mergedKeys);
+
     sort($uniqueKeys);
     $sortedUniqueKeys = array_values($uniqueKeys);
-    return array_map(function ($key) use ($secondObj, $firstObj) {
-        if (!property_exists($firstObj, $key)) {
-            return [
-                'name' => $key,
-                'type' => 'removed',
-                'value' => $secondObj->$key
-            ];
-        }
+
+    return array_map(function ($key) use ($firstObj, $secondObj) {
         if (!property_exists($secondObj, $key)) {
             return [
                 'name' => $key,
-                'type' => 'added',
+                'type' => 'removed',
                 'value' => $firstObj->$key
             ];
         }
-        if (is_object($secondObj->$key) && is_object($firstObj->$key)) {
+        if (!property_exists($firstObj, $key)) {
+            return [
+                'name' => $key,
+                'type' => 'added',
+                'value' => $secondObj->$key
+            ];
+        }
+        if (is_object($firstObj->$key) && is_object($secondObj->$key)) {
             return [
                 'name' => $key,
                 'type' => 'nested',
-                'children' => buildDiff($secondObj->$key, $firstObj->$key)
+                'children' => buildDiff($firstObj->$key, $secondObj->$key)
             ];
         }
-        if ($secondObj->$key !== $firstObj->$key) {
+        if ($firstObj->$key !== $secondObj->$key) {
             return [
                 'name' => $key,
                 'type' => 'changed',
-                'value1' => $secondObj->$key,
-                'value2' => $firstObj->$key
+                'valueBefore' => $firstObj->$key,
+                'valueAfter' => $secondObj->$key
             ];
         }
         return [
             'name' => $key,
             'type' => 'unchanged',
-            'value' => $secondObj->$key
+            'value' => $firstObj->$key
         ];
     }, $sortedUniqueKeys);
 }

@@ -26,8 +26,8 @@ function collectDiffLines(array $node, string $path = ""): array
                 $children = collectDiffLines($node['children'], "{$fullPath}.");
                 return array_merge($acc, $children);
             case 'changed':
-                $renderedValue1 = stringify($node['value1']);
-                $renderedValue2 = stringify($node['value2']);
+                $renderedValue1 = stringify($node['valueBefore']);
+                $renderedValue2 = stringify($node['valueAfter']);
                 return [...$acc, "Property '{$fullPath}' was updated. From {$renderedValue1} to {$renderedValue2}"];
             case 'removed':
                 return [...$acc, "Property '{$fullPath}' was removed"];

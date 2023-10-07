@@ -30,8 +30,8 @@ function nodeIterator(array $tree, int $depth): string
                 $unchangedValue = stringify($node['value'], $depth + 1);
                 return "{$indentation}    {$nodeName}: {$unchangedValue}";
             case 'changed':
-                $value1 = stringify($node['value1'], $depth + 1);
-                $value2 = stringify($node['value2'], $depth + 1);
+                $value1 = stringify($node['valueBefore'], $depth + 1);
+                $value2 = stringify($node['valueAfter'], $depth + 1);
                 return "{$indentation}  - {$nodeName}: {$value1}\n{$indentation}  + {$nodeName}: {$value2}";
             case 'removed':
                 $removedValue = stringify($node['value'], $depth + 1);
