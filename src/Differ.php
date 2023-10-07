@@ -22,14 +22,14 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
 function buildDiff(object $firstObj, object $secondObj): array
 {
     $mergedKeys = array_merge(
-        array_keys(get_object_vars($secondObj)),
-        array_keys(get_object_vars($firstObj))
+        array_keys(get_object_vars($firstObj)),
+        array_keys(get_object_vars($secondObj))
     );
 
     $sortedUniqueKeys = array_unique($mergedKeys);
+    natsort($sortedUniqueKeys);
 
-    $sortedUniqueKeysCopy = $sortedUniqueKeys;
-    sort($sortedUniqueKeysCopy, SORT_NATURAL);
+    $sortedUniqueKeysCopy = array_values($sortedUniqueKeys);
 
     return array_map(function (mixed $key) use ($firstObj, $secondObj) {
 
