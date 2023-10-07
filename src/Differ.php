@@ -27,7 +27,10 @@ function buildDiff(object $firstObj, object $secondObj): array
     );
 
     $sortedUniqueKeys = array_unique($mergedKeys);
-    sort($sortedUniqueKeys, SORT_NATURAL);
+
+    asort($sortedUniqueKeys, SORT_NATURAL);
+
+    $sortedUniqueKeys = array_values($sortedUniqueKeys);
 
     return array_map(function (mixed $key) use ($firstObj, $secondObj) {
 
