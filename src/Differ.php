@@ -4,8 +4,6 @@ namespace Differ\Differ;
 
 use Exception;
 
-use function Funct\Collection\sortBy;
-use function Funct\Collection\union;
 use function Differ\Formatters\formatRecords;
 use function Differ\Parsers\parseData;
 
@@ -23,10 +21,10 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
 
 function buildDiff($firstObj, $secondObj): array
 {
-    $uniqueKeys = union(array_keys(get_object_vars($secondObj)), array_keys(get_object_vars($firstObj)));
-    $sortedUniqueKeys = array_values(sortBy($uniqueKeys, function ($key) {
-        return $key;
-    }));
+    $mergedKeys = array_merge(array_keys(get_object_vars($secondObj)), array_keys(get_object_vars($firstObj)));
+    $uniqueKeys = array_unique($mergedKeys);
+    sort($uniqueKeys);
+    $sortedUniqueKeys = array_values($uniqueKeys);
     return array_map(function ($key) use ($secondObj, $firstObj) {
         if (!property_exists($firstObj, $key)) {
             return [
