@@ -4,6 +4,7 @@ namespace Differ\Differ;
 
 use Exception;
 
+use InvalidArgumentException;
 use function Differ\Formatters\formatRecords;
 use function Differ\Parsers\parseData;
 
@@ -18,15 +19,20 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
     return formatRecords($diffTree, $formatName);
 }
 
-function buildDiff($firstObj, $secondObj): array
+function buildDiff(object $firstObj, object $secondObj): array
 {
-    $mergedKeys = array_merge(array_keys(get_object_vars($secondObj)), array_keys(get_object_vars($firstObj)));
-    $uniqueKeys = array_unique($mergedKeys);
+    $mergedKeys = array_merge(
+        array_keys(get_object_vars($secondObj)),
+        array_keys(get_object_vars($firstObj))
+    );
 
-    sort($uniqueKeys);
-    $sortedUniqueKeys = array_values($uniqueKeys);
+    $sortedUniqueKeys = array_values(array_unique($mergedKeys));
+    sort($sortedUniqueKeys);
 
-    return array_map(function ($key) use ($firstObj, $secondObj) {
+    return array_map(function (mixed $key) use ($firstObj, $secondObj) {
+        if (!is_object($firstObj) || !is_object($secondObj)) {
+            throw new InvalidArgumentException('Expected an object for $firstObj and $secondObj');
+        }
         if (!property_exists($secondObj, $key)) {
             return [
                 'name' => $key,

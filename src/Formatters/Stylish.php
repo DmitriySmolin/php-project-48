@@ -84,12 +84,18 @@ function formatArrToIndentedString(array $dataArray, int $depth): string
 
 function encloseWithBrackets(array $tree, string $indent): array
 {
-    $result = array_reduce($tree, function ($carry, $item) use ($indent) {
-        $carry .= "\n{$item}";
-        return $carry;
-    }, "{");
-
-    $result .= "\n{$indent}}";
-
-    return [$result];
+    $last = count($tree) - 1;
+    if ($last == 0) {
+        return ["{\n{$tree[$last]}\n{$indent}}"];
+    }
+    $keys = array_keys($tree);
+    return array_map(function ($item, $key) use ($last, $indent) {
+        if ($key === 0) {
+            return "{\n{$item}";
+        }
+        if ($key === $last) {
+            return "{$item}\n{$indent}}";
+        }
+        return $item;
+    }, $tree, $keys);
 }

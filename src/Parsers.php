@@ -8,7 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @throws Exception
  */
-function parseData(array $fileData): mixed
+function parseData(array $fileData): array|object|null
 {
     [$format, $data] = $fileData;
 
