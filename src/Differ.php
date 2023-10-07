@@ -3,8 +3,8 @@
 namespace Differ\Differ;
 
 use Exception;
-
 use InvalidArgumentException;
+
 use function Differ\Formatters\formatRecords;
 use function Differ\Parsers\parseData;
 
