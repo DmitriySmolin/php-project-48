@@ -3,11 +3,10 @@
 namespace Differ\Differ;
 
 use Exception;
+use InvalidArgumentException;
 
 use function Differ\Formatters\formatRecords;
 use function Differ\Parsers\parseData;
-use function Funct\Collection\sortBy;
-use function Funct\Collection\union;
 
 /**
  * @throws Exception
@@ -22,10 +21,15 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
 
 function buildDiff(object $firstObj, object $secondObj): array
 {
-    $uniqueKey = union(array_keys(get_object_vars($firstObj)), array_keys(get_object_vars($secondObj)));
-    $sortedUniqueKeys = array_values(sortBy($uniqueKey, function ($key) {
-        return $key;
-    }));
+    $mergedKeys = array_merge(
+        array_keys(get_object_vars($secondObj)),
+        array_keys(get_object_vars($firstObj))
+    );
+
+    $sortedUniqueKeys = array_unique($mergedKeys);
+
+    $sortedUniqueKeysCopy = $sortedUniqueKeys;
+    sort($sortedUniqueKeysCopy, SORT_NATURAL);
 
     return array_map(function (mixed $key) use ($firstObj, $secondObj) {
 
@@ -63,7 +67,7 @@ function buildDiff(object $firstObj, object $secondObj): array
             'type' => 'unchanged',
             'value' => $firstObj->$key
         ];
-    }, $sortedUniqueKeys);
+    }, $sortedUniqueKeysCopy);
 }
 
 /**
