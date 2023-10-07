@@ -27,8 +27,17 @@ $ make install
 
 ## Asciinema recordings:
 
+* ### [help output](https://asciinema.org/a/xkLgKrbQF2hmPm0QnC4uzibQg) 
+[![asciicast](https://asciinema.org/a/xkLgKrbQF2hmPm0QnC4uzibQg.svg)](https://asciinema.org/a/xkLgKrbQF2hmPm0QnC4uzibQg)
+
+* ### [arguments and options](https://asciinema.org/a/awosB5FVLbeGeTRZiPfiBP9oY) 
+[![asciicast](https://asciinema.org/a/awosB5FVLbeGeTRZiPfiBP9oY.svg)](https://asciinema.org/a/awosB5FVLbeGeTRZiPfiBP9oY)
+
 * ### [genDiff format "stylish" JSON](https://asciinema.org/a/CzutzCjsjQeZVGzSAGnbM9hw6) 
 [![asciicast](https://asciinema.org/a/CzutzCjsjQeZVGzSAGnbM9hw6.svg)](https://asciinema.org/a/CzutzCjsjQeZVGzSAGnbM9hw6)
+
+* ### [automated testing and CI (continuous integration)](https://asciinema.org/a/8liQFHCOtTpLgbdRaFA0FRdoM) 
+[![asciicast](https://asciinema.org/a/8liQFHCOtTpLgbdRaFA0FRdoM.svg)](https://asciinema.org/a/8liQFHCOtTpLgbdRaFA0FRdoM)
 
 * ### [genDiff format "stylish" YAML](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl) 
 [![asciicast](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl.svg)](https://asciinema.org/a/NZjoJG6YCWzSmygfTkJIgLyxl)

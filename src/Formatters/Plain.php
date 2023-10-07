@@ -4,8 +4,6 @@ namespace Differ\Formatters\Plain;
 
 use Exception;
 
-use function Functional\pick;
-
 /**
  * @throws Exception
  */
@@ -18,48 +16,40 @@ function renderPlain(array $tree): string
 /**
  * @throws Exception
  */
-function collectDiffLines(array $node, array $ancestry = []): array
+function collectDiffLines(array $node, string $path = ""): array
 {
-    $type = pick($node, 'type');
-    $key = pick($node, 'key');
-    $path = array_filter(array_merge($ancestry, [$key]), fn($item) => $item !== null);
-    $pathString = implode('.', $path);
-
-    switch ($type) {
-        case 'root':
-        case 'nested':
-            $children = pick($node, 'children');
-            return array_reduce(array_map(function ($child) use ($path) {
-                return collectDiffLines($child, $path);
-            }, $children), 'array_merge', []);
-
-        case 'changed':
-            $renderedValue1 = stringify(pick($node, 'value1'));
-            $renderedValue2 = stringify(pick($node, 'value2'));
-            return ["Property '$pathString' was updated. From $renderedValue1 to $renderedValue2"];
-
-        case 'deleted':
-            return ["Property '$pathString' was removed"];
-
-        case 'added':
-            $value = pick($node, 'value');
-            $renderedValue = stringify($value);
-            return ["Property '$pathString' was added with value: $renderedValue"];
-
-        case 'unchanged':
-            return [];
-
-        default:
-            throw new \Exception("Unknown or nonexistent state");
-    }
+    return array_reduce($node, function ($acc, $node) use ($path) {
+        $type = $node['type'];
+        $fullPath = "{$path}{$node['name']}";
+        switch ($type) {
+            case 'nested':
+                $children = collectDiffLines($node['children'], "{$fullPath}.");
+                return array_merge($acc, $children);
+            case 'changed':
+                $renderedValue1 = stringify($node['value1']);
+                $renderedValue2 = stringify($node['value2']);
+                return [...$acc, "Property '{$fullPath}' was updated. From {$renderedValue1} to {$renderedValue2}"];
+            case 'removed':
+                return [...$acc, "Property '{$fullPath}' was removed"];
+            case 'added':
+                $value = stringify($node['value']);
+                return [...$acc, "Property '{$fullPath}' was added with value: {$value}"];
+        }
+        return $acc;
+    }, []);
 }
 
 
 function stringify(mixed $value): string
 {
-    if (is_array($value)) {
-        return '[complex value]';
+    if (is_null($value)) {
+        return 'null';
     }
-
-    return var_export($value, true) === 'NULL' ? 'null' : var_export($value, true);
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+    if (is_object($value) || is_array($value)) {
+        return "[complex value]";
+    }
+    return is_numeric($value) ? (string) $value : "'$value'";
 }

@@ -4,7 +4,8 @@ namespace Differ\Differ;
 
 use Exception;
 
-use function Functional\sort;
+use function Funct\Collection\sortBy;
+use function Funct\Collection\union;
 use function Differ\Formatters\formatRecords;
 use function Differ\Parsers\parseData;
 
@@ -13,76 +14,55 @@ use function Differ\Parsers\parseData;
  */
 function genDiff(string $firstPath, string $secondPath, string $formatName = 'stylish'): string
 {
-    $firstArray = parseData(getFileData($firstPath));
-    $secondArray = parseData(getFileData($secondPath));
-    $diffTree = buildDiffTree($firstArray, $secondArray);
+    $firstObj = parseData(getFileData($firstPath));
+    $secondObj = parseData(getFileData($secondPath));
+    $diffTree = buildDiff($firstObj, $secondObj);
     return formatRecords($diffTree, $formatName);
 }
 
 
-function buildDiff(array $firstArray, array $secondArray): array
+function buildDiff($firstObj, $secondObj): array
 {
-    $keys = array_unique(
-        array_merge(
-            array_keys($firstArray),
-            array_keys($secondArray)
-        )
-    );
-
-    $sortedKeys = sort($keys, fn(string $left, string $right) => strcmp($left, $right));
-
-    return array_map(function (string $key) use ($firstArray, $secondArray) {
-
-        $value1 = $firstArray[$key] ?? null;
-        $value2 = $secondArray[$key] ?? null;
-
-        if (!array_key_exists($key, $firstArray)) {
+    $uniqueKeys = union(array_keys(get_object_vars($secondObj)), array_keys(get_object_vars($firstObj)));
+    $sortedUniqueKeys = array_values(sortBy($uniqueKeys, function ($key) {
+        return $key;
+    }));
+    return array_map(function ($key) use ($secondObj, $firstObj) {
+        if (!property_exists($firstObj, $key)) {
             return [
-                'key' => $key,
+                'name' => $key,
+                'type' => 'removed',
+                'value' => $secondObj->$key
+            ];
+        }
+        if (!property_exists($secondObj, $key)) {
+            return [
+                'name' => $key,
                 'type' => 'added',
-                'value' => $value2,
+                'value' => $firstObj->$key
             ];
         }
-
-        if (!array_key_exists($key, $secondArray)) {
+        if (is_object($secondObj->$key) && is_object($firstObj->$key)) {
             return [
-                'key' => $key,
-                'type' => 'deleted',
-                'value' => $value1,
-            ];
-        }
-
-        if (is_array($value1) && is_array($value2)) {
-            return [
-                'key' => $key,
+                'name' => $key,
                 'type' => 'nested',
-                'children' => buildDiff($value1, $value2),
+                'children' => buildDiff($secondObj->$key, $firstObj->$key)
             ];
         }
-
-        if ($value1 === $value2) {
+        if ($secondObj->$key !== $firstObj->$key) {
             return [
-                'key' => $key,
-                'type' => 'unchanged',
-                'value' => $value1,
+                'name' => $key,
+                'type' => 'changed',
+                'value1' => $secondObj->$key,
+                'value2' => $firstObj->$key
             ];
         }
-
         return [
-            'key' => $key,
-            'type' => 'changed',
-            'value1' => $value1,
-            'value2' => $value2,
+            'name' => $key,
+            'type' => 'unchanged',
+            'value' => $secondObj->$key
         ];
-    }, $sortedKeys);
-}
-
-function buildDiffTree(array $firstArray, array $secondArray): array
-{
-    return [
-        'type' => 'root',
-        'children' => buildDiff($firstArray, $secondArray),
-    ];
+    }, $sortedUniqueKeys);
 }
 
 /**

@@ -4,8 +4,6 @@ namespace Differ\Formatters\Stylish;
 
 use Exception;
 
-use function Functional\pick;
-
 /**
  * @throws Exception
  */
@@ -17,98 +15,81 @@ function renderStylish(array $node): string
 /**
  * @throws Exception
  */
-function nodeIterator(array $node, int $depth): string
+function nodeIterator(array $tree, int $depth): string
 {
-    $itemIndent = buildIndent($depth, 2);
-    $bracketIndent = buildIndent($depth);
-
-    $type = pick($node, 'type');
-
-    switch ($type) {
-        case 'root':
-            $children = pick($node, 'children');
-            $lines = array_map(
-                function (array $node) use ($depth) {
-                    return nodeIterator($node, $depth);
-                },
-                $children
-            );
-
-            $result = ['{', ...$lines, '}'];
-            return implode("\n", $result);
-
-        case 'nested':
-            $key = pick($node, 'key');
-            $children = pick($node, 'children');
-
-            $lines = array_map(
-                function (array $node) use ($depth) {
-                    return nodeIterator($node, $depth + 1);
-                },
-                $children
-            );
-
-            $result = ["{$itemIndent}  {$key}: {", ...$lines, "{$bracketIndent}}"];
-            return implode("\n", $result);
-
-        case 'changed':
-            $key = pick($node, 'key');
-
-            $renderedValue1 = stringify(pick($node, 'value1'), $depth + 1);
-            $renderedValue2 = stringify(pick($node, 'value2'), $depth + 1);
-
-            $first = "{$itemIndent}- {$key}: {$renderedValue1}";
-            $second = "{$itemIndent}+ {$key}: {$renderedValue2}";
-
-            return implode("\n", [$first, $second]);
-
-        case 'deleted':
-            $key = pick($node, 'key');
-            $value = pick($node, 'value');
-
-            $renderedValue = stringify($value, $depth + 1);
-
-            return "{$itemIndent}- {$key}: {$renderedValue}";
-
-        case 'added':
-            $key = pick($node, 'key');
-            $value = pick($node, 'value');
-
-            $renderedValue = stringify($value, $depth + 1);
-
-            return "{$itemIndent}+ {$key}: {$renderedValue}";
-
-        case 'unchanged':
-            $key = pick($node, 'key');
-            $value = pick($node, 'value');
-
-            $renderedValue = stringify($value, $depth + 1);
-
-            return "{$itemIndent}  {$key}: {$renderedValue}";
-
-        default:
-            throw new Exception("Unknown or not existed state");
-    }
+    $indentation = str_repeat('    ', $depth);
+    $formattedData = array_map(function ($node) use ($indentation, $depth): string {
+        $nodeType = $node['type'];
+        $nodeName = $node['name'];
+        $formattedNode = "";
+        switch ($nodeType) {
+            case 'nested':
+                $nestedNodes = nodeIterator($node['children'], $depth + 1);
+                return "{$indentation}    {$nodeName}: {$nestedNodes}";
+            case 'unchanged':
+                $unchangedValue = stringify($node['value'], $depth + 1);
+                return "{$indentation}    {$nodeName}: {$unchangedValue}";
+            case 'changed':
+                $value1 = stringify($node['value1'], $depth + 1);
+                $value2 = stringify($node['value2'], $depth + 1);
+                return "{$indentation}  - {$nodeName}: {$value1}\n{$indentation}  + {$nodeName}: {$value2}";
+            case 'removed':
+                $removedValue = stringify($node['value'], $depth + 1);
+                return "{$indentation}  - {$nodeName}: {$removedValue}";
+            case 'added':
+                $addedValue = stringify($node['value'], $depth + 1);
+                return "{$indentation}  + {$nodeName}: {$addedValue}";
+        }
+        return $formattedNode;
+    }, $tree);
+    return implode("\n", encloseWithBrackets($formattedData, $indentation));
 }
 
 function stringify(mixed $data, int $depth = 0): string
 {
-    if (!is_array($data)) {
-        return trim($data === null ? 'null' : var_export($data, true), "'");
+    if (is_null($data)) {
+        return 'null';
     }
 
-    $itemIndent = buildIndent($depth);
-    $bracketIndent = buildIndent($depth - 1);
+    if (is_bool($data)) {
+        return $data ? 'true' : 'false';
+    }
 
-    $lines = array_map(function ($key, $value) use ($depth, $itemIndent) {
-        return "{$itemIndent}" . stringify($key) . ": " . stringify($value, $depth + 1);
-    }, array_keys($data), $data);
+    if (is_object($data)) {
+        return formatArrToIndentedString(array_map(function ($key) use ($data, $depth): array {
+            $value = $data->$key;
+            return [
+                'name' => $key,
+                'value' => is_object($value) ? stringify($value, $depth + 1) : $value
+            ];
+        }, array_keys(get_object_vars($data))), $depth);
+    }
 
-    return implode("\n", ['{', ...$lines, "{$bracketIndent}}"]);
+    return (string)$data;
 }
 
-function buildIndent(int $depthOfNode, int $lengthOfTag = 0): string
+function formatArrToIndentedString(array $dataArray, int $depth): string
 {
-    $depthOfElement = $depthOfNode + 1;
-    return str_repeat(' ', 4 * $depthOfElement - $lengthOfTag);
+    $indentation = str_repeat('    ', $depth);
+    $formattedString = array_map(function ($node) use ($depth, $indentation): string {
+        if (is_array($node['value'])) {
+            $formattedChildren = formatArrToIndentedString($node['value'], $depth + 1);
+            return "{$indentation}    {$node['name']}: {$formattedChildren}";
+        } else {
+            return "{$indentation}    {$node['name']}: {$node['value']}";
+        }
+    }, $dataArray);
+    return implode("\n", encloseWithBrackets($formattedString, $indentation));
+}
+
+function encloseWithBrackets(array $tree, string $indent): array
+{
+    $result = array_reduce($tree, function ($carry, $item) use ($indent) {
+        $carry .= "\n{$item}";
+        return $carry;
+    }, "{");
+
+    $result .= "\n{$indent}}";
+
+    return [$result];
 }

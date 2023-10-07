@@ -57,6 +57,9 @@ class FormatterTest extends TestCase
         $this->assertEquals($expectedPlain, $actual);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testMakeJsonRecursiveJson()
     {
         $firstArray = 'tests/fixtures/recursive/json/file1.json';
