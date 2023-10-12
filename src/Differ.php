@@ -13,8 +13,8 @@ use function Differ\Parsers\parseData;
  */
 function genDiff(string $firstPath, string $secondPath, string $formatName = 'stylish'): string
 {
-    $firstObj = parseData(getFileData($firstPath));
-    $secondObj = parseData(getFileData($secondPath));
+    $firstObj = getFileData($firstPath);
+    $secondObj = getFileData($secondPath);
     $diffTree = buildDiff($firstObj, $secondObj);
     return formatRecords($diffTree, $formatName);
 }
@@ -67,7 +67,7 @@ function buildDiff(object $firstObj, object $secondObj): array
 /**
  * @throws Exception
  */
-function getFileData(string $filePath): array
+function getFileData(string $filePath): object
 {
     if (!file_exists($filePath)) {
         throw new Exception("File not found: {$filePath}");
@@ -77,5 +77,5 @@ function getFileData(string $filePath): array
 
     $data = file_get_contents($filePath);
 
-    return [$format, $data];
+    return parseData($format, $data);
 }

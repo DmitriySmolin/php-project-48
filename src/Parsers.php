@@ -8,10 +8,8 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @throws Exception
  */
-function parseData(array $fileData): mixed
+function parseData(string $format, string $data): mixed
 {
-    [$format, $data] = $fileData;
-
     return match ($format) {
         'json' => json_decode($data),
         'yaml', 'yml' => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP),

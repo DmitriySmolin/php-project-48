@@ -17,7 +17,7 @@ function renderStylish(array $node): string
  */
 function nodeIterator(array $tree, int $depth): string
 {
-    $indentation = str_repeat('    ', $depth);
+    $indentation = buildIndent($depth);
     $formattedData = array_map(function ($node) use ($indentation, $depth): string {
         $nodeType = $node['type'];
         $nodeName = $node['name'];
@@ -45,6 +45,7 @@ function nodeIterator(array $tree, int $depth): string
     return implode("\n", encloseWithBrackets($formattedData, $indentation));
 }
 
+
 function stringify(mixed $data, int $depth = 0): string
 {
     if (is_null($data)) {
@@ -70,7 +71,7 @@ function stringify(mixed $data, int $depth = 0): string
 
 function formatArrToIndentedString(array $dataArray, int $depth): string
 {
-    $indentation = str_repeat('    ', $depth);
+    $indentation = buildIndent($depth);
     $formattedString = array_map(function ($node) use ($depth, $indentation): string {
         if (is_array($node['value'])) {
             $formattedChildren = formatArrToIndentedString($node['value'], $depth + 1);
@@ -98,4 +99,9 @@ function encloseWithBrackets(array $tree, string $indent): array
         }
         return $item;
     }, $tree, $keys);
+}
+
+function buildIndent(int $depth): string
+{
+    return str_repeat('    ', $depth);
 }
