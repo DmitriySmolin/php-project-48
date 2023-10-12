@@ -8,7 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @throws Exception
  */
-function parseData(string $format, string $data): mixed
+function parseData(string $format, mixed $data): mixed
 {
     return match ($format) {
         'json' => json_decode($data),
