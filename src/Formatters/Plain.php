@@ -7,7 +7,7 @@ use Exception;
 /**
  * @throws Exception
  */
-function renderPlain(array $tree): string
+function render(array $tree): string
 {
     $lines = collectDiffLines($tree);
     return implode("\n", $lines);

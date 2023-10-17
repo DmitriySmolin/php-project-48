@@ -3,10 +3,9 @@
 namespace Differ\Formatters;
 
 use Exception;
-
-use function Differ\Formatters\Json\renderJson;
-use function Differ\Formatters\Stylish\renderStylish;
-use function Differ\Formatters\Plain\renderPlain;
+use  Differ\Formatters\Stylish;
+use  Differ\Formatters\Plain;
+use Differ\Formatters\Json;
 
 /**
  * @throws Exception
@@ -14,9 +13,9 @@ use function Differ\Formatters\Plain\renderPlain;
 function formatRecords(array $records, string $formatName): string
 {
     return match ($formatName) {
-        'stylish' => renderStylish($records),
-        'plain' => renderPlain($records),
-        'json' => renderJson($records),
+        'stylish' => Stylish\render($records),
+        'plain' => Plain\render($records),
+        'json' => Json\render($records),
         default => throw new \Exception("The '$formatName' format is unknown"),
     };
 }

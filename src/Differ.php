@@ -21,7 +21,9 @@ function genDiff(string $firstPath, string $secondPath, string $formatName = 'st
 
 function buildDiff(object $firstObj, object $secondObj): array
 {
-    $keys = array_unique(array_merge(array_keys(get_object_vars($firstObj)), array_keys(get_object_vars($secondObj))));
+    $getKeys = fn($obj) => array_keys(get_object_vars($obj));
+
+    $keys = array_unique(array_merge($getKeys($firstObj), $getKeys($secondObj)));
 
     $sortedKeys = array_values(sort($keys, fn($left, $right) => strcmp($left, $right)));
 

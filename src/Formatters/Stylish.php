@@ -7,7 +7,7 @@ use Exception;
 /**
  * @throws Exception
  */
-function renderStylish(array $node): string
+function render(array $node): string
 {
     return nodeIterator($node, 0);
 }
