@@ -42,9 +42,9 @@ function nodeIterator(array $tree, int $depth): string
         }
         return $formattedNode;
     }, $tree);
-    return implode("\n", encloseWithBrackets($formattedData, $indentation));
+    $joinedData = implode("\n", $formattedData);
+    return "{\n{$joinedData}\n{$indentation}}";
 }
-
 
 function stringify(mixed $data, int $depth = 0): string
 {
@@ -80,25 +80,8 @@ function formatArrToIndentedString(array $dataArray, int $depth): string
             return "{$indentation}    {$node['name']}: {$node['value']}";
         }
     }, $dataArray);
-    return implode("\n", encloseWithBrackets($formattedString, $indentation));
-}
-
-function encloseWithBrackets(array $tree, string $indent): array
-{
-    $last = count($tree) - 1;
-    if ($last == 0) {
-        return ["{\n{$tree[$last]}\n{$indent}}"];
-    }
-    $keys = array_keys($tree);
-    return array_map(function ($item, $key) use ($last, $indent) {
-        if ($key === 0) {
-            return "{\n{$item}";
-        }
-        if ($key === $last) {
-            return "{$item}\n{$indent}}";
-        }
-        return $item;
-    }, $tree, $keys);
+    $joinedString = implode("\n", $formattedString);
+    return "{\n{$joinedString}\n{$indentation}}";
 }
 
 function buildIndent(int $depth): string
